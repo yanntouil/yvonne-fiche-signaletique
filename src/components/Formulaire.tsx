@@ -495,7 +495,7 @@ export const Formulaire: React.FC<FormulaireProps> = ({ values, onValuesChange }
                               data: { ...data, informations: { ...data.informations, managerContact: e.target.value } },
                             })
                           }}
-                          placeholder='Tel : (+352) 621 123 456 | Mail : contact@website.lu'
+                          placeholder={"Tel : (+352) 621 123 456\nMail : contact@website.lu"}
                           rows={3}
                         />
                       </div>
