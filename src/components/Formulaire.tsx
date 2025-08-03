@@ -23,7 +23,7 @@ type Data = {
     individual: boolean
     onInvoice: boolean
   }
-  guaranteePayment: "ask" | "individual" | "no" | null
+  guaranteePayment: "ask" | "individual" | "no" | "no-minibar-check" | null
   baggageService: {
     hasBaggageService: boolean
     arrivalTime: string | null
@@ -196,6 +196,16 @@ export const Formulaire: React.FC<FormulaireProps> = ({ values, onValuesChange }
                     })
                   }}
                   label='Ne pas demander, les extras seront pris en charge par la société'
+                />
+                <CheckboxField
+                  value={data.guaranteePayment === "no-minibar-check"}
+                  onValueChange={(value) => {
+                    onValuesChange({
+                      ...values,
+                      data: { ...data, guaranteePayment: value ? "no-minibar-check" : null },
+                    })
+                  }}
+                  label='Ne pas demander, mais le check minibar doit être fait avant départ'
                 />
               </RowContent>
             </Row>
