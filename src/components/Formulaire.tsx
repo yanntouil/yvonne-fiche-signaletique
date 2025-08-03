@@ -24,6 +24,7 @@ type Data = {
     onInvoice: boolean
   }
   guaranteePayment: "ask" | "individual" | "no" | "no-minibar-check" | null
+  identityCard: "individual" | "not-necessary" | "ask" | null
   baggageService: {
     hasBaggageService: boolean
     arrivalTime: string | null
@@ -56,6 +57,7 @@ export const initialData: Data = {
     onInvoice: false,
   },
   guaranteePayment: null,
+  identityCard: null,
   baggageService: {
     hasBaggageService: false,
     arrivalTime: null,
@@ -210,6 +212,42 @@ export const Formulaire: React.FC<FormulaireProps> = ({ values, onValuesChange }
                     })
                   }}
                   label='Ne pas demander, mais le check minibar doit être fait avant départ'
+                />
+              </RowContent>
+            </Row>
+            {/* identityCard */}
+            <Row>
+              <RowTitle>Carte d'identité :</RowTitle>
+              <RowContent className='flex-col'>
+                <CheckboxField
+                  value={data.identityCard === "individual"}
+                  onValueChange={(value) => {
+                    onValuesChange({
+                      ...values,
+                      data: { ...data, identityCard: value ? "individual" : null },
+                    })
+                  }}
+                  label='À prendre individuellement'
+                />
+                <CheckboxField
+                  value={data.identityCard === "not-necessary"}
+                  onValueChange={(value) => {
+                    onValuesChange({
+                      ...values,
+                      data: { ...data, identityCard: value ? "not-necessary" : null },
+                    })
+                  }}
+                  label='Pas nécessaire'
+                />
+                <CheckboxField
+                  value={data.identityCard === "ask"}
+                  onValueChange={(value) => {
+                    onValuesChange({
+                      ...values,
+                      data: { ...data, identityCard: value ? "ask" : null },
+                    })
+                  }}
+                  label='Demander au guide / responsable'
                 />
               </RowContent>
             </Row>
