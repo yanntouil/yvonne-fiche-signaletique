@@ -29,7 +29,10 @@ type Data = {
     arrivalTime: string | null
     departureTime: string | null
   }
-  dinner: "yes" | "only-first-day" | null
+  dinner: {
+    type: "yes" | "only-first-day" | null
+    remarks: string
+  }
   informations: {
     hasInformations: boolean
     arrivalTime: string | null
@@ -56,7 +59,10 @@ export const initialData: Data = {
     arrivalTime: null,
     departureTime: null,
   },
-  dinner: null,
+  dinner: {
+    type: null,
+    remarks: "",
+  },
   informations: {
     hasInformations: false,
     arrivalTime: null,
@@ -75,9 +81,17 @@ interface FormulaireProps {
 
 export const Formulaire: React.FC<FormulaireProps> = ({ values, onValuesChange }) => {
   const safeData = (data: Partial<Data>) => {
+    // Gérer la migration de l'ancien format dinner
+    const migratedData = { ...data }
+    if (data.dinner && typeof data.dinner === 'string') {
+      migratedData.dinner = {
+        type: data.dinner as "yes" | "only-first-day",
+        remarks: ""
+      }
+    }
     return {
       ...initialData,
-      ...data,
+      ...migratedData,
     }
   }
   const data = safeData(values.data)
@@ -116,6 +130,11 @@ export const Formulaire: React.FC<FormulaireProps> = ({ values, onValuesChange }
                   }}
                   label='Chambres prises en charge'
                 />
+                {data.roomPayment.individual && data.roomPayment.onInvoice && (
+                  <span className='text-sm text-muted-foreground italic ml-2'>
+                    → Voir remarques
+                  </span>
+                )}
               </RowContent>
             </Row>
             {/* extraPayment */}
@@ -298,29 +317,63 @@ export const Formulaire: React.FC<FormulaireProps> = ({ values, onValuesChange }
               )}
             </Row>
             {/* dinner */}
-            <Row className={cn(!data.dinner && "print:hidden")}>
+            <Row className={cn(!data.dinner.type && !data.dinner.remarks && "print:hidden")}>
               <RowTitle>Dîner :</RowTitle>
-              <RowContent>
-                <CheckboxField
-                  value={data.dinner === "yes"}
-                  onValueChange={(value) => {
-                    onValuesChange({
-                      ...values,
-                      data: { ...data, dinner: value ? "yes" : null },
-                    })
-                  }}
-                  label='Tous les soirs'
-                />
-                <CheckboxField
-                  value={data.dinner === "only-first-day"}
-                  onValueChange={(value) => {
-                    onValuesChange({
-                      ...values,
-                      data: { ...data, dinner: value ? "only-first-day" : null },
-                    })
-                  }}
-                  label='Uniquement le premier soir'
-                />
+              <RowContent className='flex-col'>
+                <div className='flex gap-x-8'>
+                  <CheckboxField
+                    value={data.dinner.type === "yes"}
+                    onValueChange={(value) => {
+                      onValuesChange({
+                        ...values,
+                        data: { ...data, dinner: { ...data.dinner, type: value ? "yes" : null } },
+                      })
+                    }}
+                    label='Tous les soirs'
+                  />
+                  <CheckboxField
+                    value={data.dinner.type === "only-first-day"}
+                    onValueChange={(value) => {
+                      onValuesChange({
+                        ...values,
+                        data: { ...data, dinner: { ...data.dinner, type: value ? "only-first-day" : null } },
+                      })
+                    }}
+                    label='Uniquement le premier soir'
+                  />
+                </div>
+                <div className='grid grid-cols-[10rem_1fr] gap-x-8 items-start mt-4 print:hidden'>
+                  <div className='text-gray-500 w-max shrink-0 pt-1'>Remarques : </div>
+                  <div className='flex gap-x-8'>
+                    <Textarea
+                      value={data.dinner.remarks}
+                      onChange={(e) => {
+                        onValuesChange({
+                          ...values,
+                          data: { ...data, dinner: { ...data.dinner, remarks: e.target.value } },
+                        })
+                      }}
+                      rows={3}
+                      placeholder='Ajouter des remarques'
+                    />
+                  </div>
+                </div>
+                {data.dinner.remarks && (
+                  <div className='print:flex hidden mt-2'>
+                    <div className='bg-muted-foreground/10 py-3 px-8 rounded-md'>
+                      <h3 className='text-base font-semibold text-gray-800'>Remarques :</h3>
+                      <p className='text-sm text-muted-foreground'>
+                        <InterpolateMD
+                          strong={(part) => <span className='font-semibold text-foreground'>{part}</span>}
+                          italic={(part) => <span className='italic'>{part}</span>}
+                          linebreak={() => <br className='block' />}
+                        >
+                          {data.dinner.remarks}
+                        </InterpolateMD>
+                      </p>
+                    </div>
+                  </div>
+                )}
               </RowContent>
             </Row>
             {/* informations */}

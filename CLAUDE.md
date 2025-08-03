@@ -4,13 +4,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a React TypeScript application called "Fiche Signalétique" - a form management system that allows users to create, manage, and organize multiple forms with persistent data storage. The app can run as a web application, PWA, or Electron desktop app.
+This is a React TypeScript application called "Fiche Signalétique" - a form management system that allows users to create, manage, and organize multiple forms with persistent data storage. The app can run as a web application, PWA, or Electron desktop app. The application is deployed on Vercel for production use.
+
+### Business Purpose
+The application is used to create identification sheets ("fiches signalétiques") that are stored in local storage for printing purposes. Once printed, these sheets provide collaborators with all necessary information at hand to perform their work efficiently. The primary workflow is:
+1. Create and fill out forms with client/participant information
+2. Store data locally in the browser
+3. Print the forms for field use by collaborators
 
 ## Key Commands
 
 ### Development
 - `npm run dev` - Start Vite development server
-- `npm run build` - Build production bundle
+- `npm run build` - Build production bundle (used by Vercel for deployment)
 - `npm run preview` - Preview production build locally
 - `npm run lint` - Run ESLint (fails on warnings)
 
@@ -68,4 +74,4 @@ This project currently has no testing setup. When implementing features:
 - Active form is tracked with `ficheActuelle` state
 
 ### Printing
-The app includes print-specific styles. When modifying the form layout, test the print preview to ensure proper formatting.
+The app includes print-specific styles. When modifying the form layout, test the print preview to ensure proper formatting. Printing is a critical feature as it's the primary output method for collaborators to use the information in the field.
