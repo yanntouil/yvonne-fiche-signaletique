@@ -38,6 +38,8 @@ type Data = {
     arrivalTime: string | null
     departureTime: string | null
     type: "business" | "tourist" | null
+    linkedToEvent: boolean
+    eventName: string
     checkIn: "group" | "individual" | null
     managerName: string
     managerContact: string
@@ -68,6 +70,8 @@ export const initialData: Data = {
     arrivalTime: null,
     departureTime: null,
     type: null,
+    linkedToEvent: false,
+    eventName: "",
     checkIn: null,
     managerName: "",
     managerContact: "",
@@ -438,6 +442,39 @@ export const Formulaire: React.FC<FormulaireProps> = ({ values, onValuesChange }
                         />
                       </div>
                     </div>
+                    <div className='grid grid-cols-[10rem_1fr] gap-x-8 items-center'>
+                      <div className='text-gray-500 w-max shrink-0'>Lier à un événement : </div>
+                      <div className='flex gap-x-4 items-center'>
+                        <Checkbox
+                          checked={data.informations.linkedToEvent}
+                          onCheckedChange={(value) => {
+                            onValuesChange({
+                              ...values,
+                              data: {
+                                ...data,
+                                informations: {
+                                  ...data.informations,
+                                  linkedToEvent: value === "indeterminate" ? false : value,
+                                },
+                              },
+                            })
+                          }}
+                        />
+                        {data.informations.linkedToEvent && (
+                          <Input
+                            value={data.informations.eventName}
+                            onChange={(e) => {
+                              onValuesChange({
+                                ...values,
+                                data: { ...data, informations: { ...data.informations, eventName: e.target.value } },
+                              })
+                            }}
+                            placeholder="Nom de l'événement"
+                            className='flex-1'
+                          />
+                        )}
+                      </div>
+                    </div>
                     <div className='grid grid-cols-[10rem_auto_1fr] gap-x-8 items-center'>
                       <div className='text-gray-500 w-max shrink-0'>Arrivée : </div>
                       <div className='relative'>
@@ -587,6 +624,11 @@ export const Formulaire: React.FC<FormulaireProps> = ({ values, onValuesChange }
                         <span className='font-semibold'>
                           {data.informations.type === "business" ? "Business" : "Loisir"}
                         </span>
+                      </div>
+                    )}
+                    {data.informations.linkedToEvent && data.informations.eventName && (
+                      <div>
+                        Lié à un événement : <span className='font-semibold'>{data.informations.eventName}</span>
                       </div>
                     )}
                     <div>
