@@ -86,20 +86,6 @@ interface FormulaireProps {
 }
 
 export const Formulaire: React.FC<FormulaireProps> = ({ values, onValuesChange }) => {
-  const safeData = (data: Partial<Data>) => {
-    // Gérer la migration de l'ancien format dinner
-    const migratedData = { ...data }
-    if (data.dinner && typeof data.dinner === 'string') {
-      migratedData.dinner = {
-        type: data.dinner as "yes" | "only-first-day",
-        remarks: ""
-      }
-    }
-    return {
-      ...initialData,
-      ...migratedData,
-    }
-  }
   const data = safeData(values.data)
   return (
     <div className='max-w-4xl mx-auto'>
@@ -137,9 +123,7 @@ export const Formulaire: React.FC<FormulaireProps> = ({ values, onValuesChange }
                   label='Chambres prises en charge'
                 />
                 {data.roomPayment.individual && data.roomPayment.onInvoice && (
-                  <span className='text-sm text-muted-foreground italic ml-2'>
-                    → Voir remarques
-                  </span>
+                  <span className='text-sm text-muted-foreground italic ml-2'>→ Voir remarques</span>
                 )}
               </RowContent>
             </Row>
@@ -830,4 +814,77 @@ const prettifyTime = (time: string | null) => {
   // replace the first 0 by nothing
   const hoursWithoutFirstZero = hours.replace(/^0/, "")
   return `${hoursWithoutFirstZero}h${minutes}`
+}
+
+const safeData = (data: Partial<Data>): Data => {
+  // Gérer la migration de l'ancien format dinner
+  const migratedData = { ...data }
+  if (data.dinner && typeof data.dinner === "string") {
+    migratedData.dinner = {
+      type: data.dinner as "yes" | "only-first-day",
+      remarks: "",
+    }
+  }
+
+  return {
+    roomPayment: {
+      individual:
+        typeof migratedData.roomPayment?.individual === "boolean" ? migratedData.roomPayment.individual : false,
+      onInvoice: typeof migratedData.roomPayment?.onInvoice === "boolean" ? migratedData.roomPayment.onInvoice : false,
+    },
+    extraPayment: {
+      individual:
+        typeof migratedData.extraPayment?.individual === "boolean" ? migratedData.extraPayment.individual : false,
+      onInvoice:
+        typeof migratedData.extraPayment?.onInvoice === "boolean" ? migratedData.extraPayment.onInvoice : false,
+    },
+    guaranteePayment: ["ask", "individual", "no", "no-minibar-check"].includes(migratedData.guaranteePayment as string)
+      ? (migratedData.guaranteePayment as "ask" | "individual" | "no" | "no-minibar-check")
+      : null,
+    identityCard: ["individual", "not-necessary", "ask"].includes(migratedData.identityCard as string)
+      ? (migratedData.identityCard as "individual" | "not-necessary" | "ask")
+      : null,
+    baggageService: {
+      hasBaggageService:
+        typeof migratedData.baggageService?.hasBaggageService === "boolean"
+          ? migratedData.baggageService.hasBaggageService
+          : false,
+      arrivalTime:
+        typeof migratedData.baggageService?.arrivalTime === "string" ? migratedData.baggageService.arrivalTime : null,
+      departureTime:
+        typeof migratedData.baggageService?.departureTime === "string"
+          ? migratedData.baggageService.departureTime
+          : null,
+    },
+    dinner: {
+      type: ["yes", "only-first-day"].includes(migratedData.dinner?.type as string)
+        ? (migratedData.dinner?.type as "yes" | "only-first-day")
+        : null,
+      remarks: typeof migratedData.dinner?.remarks === "string" ? migratedData.dinner.remarks : "",
+    },
+    informations: {
+      hasInformations:
+        typeof migratedData.informations?.hasInformations === "boolean"
+          ? migratedData.informations.hasInformations
+          : false,
+      arrivalTime:
+        typeof migratedData.informations?.arrivalTime === "string" ? migratedData.informations.arrivalTime : null,
+      departureTime:
+        typeof migratedData.informations?.departureTime === "string" ? migratedData.informations.departureTime : null,
+      type: ["business", "tourist"].includes(migratedData.informations?.type as string)
+        ? (migratedData.informations?.type as "business" | "tourist")
+        : null,
+      linkedToEvent:
+        typeof migratedData.informations?.linkedToEvent === "boolean" ? migratedData.informations.linkedToEvent : false,
+      eventName: typeof migratedData.informations?.eventName === "string" ? migratedData.informations.eventName : "",
+      checkIn: ["group", "individual"].includes(migratedData.informations?.checkIn as string)
+        ? (migratedData.informations?.checkIn as "group" | "individual")
+        : null,
+      managerName:
+        typeof migratedData.informations?.managerName === "string" ? migratedData.informations.managerName : "",
+      managerContact:
+        typeof migratedData.informations?.managerContact === "string" ? migratedData.informations.managerContact : "",
+      message: typeof migratedData.informations?.message === "string" ? migratedData.informations.message : "",
+    },
+  }
 }
