@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { TextareaEditor } from "@101-lu/compo-shared-tiptap"
+import { defaultTextareaProse, iconAssets, makeIconStyleVariables, useColorPalette } from "@101-lu/compo-shared-tiptap/prose"
 import { A, F } from "@mobily/ts-belt"
 import { X } from "lucide-react"
 import React from "react"
@@ -87,8 +88,17 @@ interface FormulaireProps {
 
 export const Formulaire: React.FC<FormulaireProps> = ({ values, onValuesChange }) => {
   const data = safeData(values.data)
+  const { colorPaletteStyle } = useColorPalette()
+  const editorStyle = React.useMemo(
+    () => ({
+      ...makeIconStyleVariables(iconAssets),
+      ...colorPaletteStyle,
+    }),
+    [colorPaletteStyle],
+  )
+
   return (
-    <div className='max-w-4xl mx-auto'>
+    <div className='max-w-4xl mx-auto' style={editorStyle}>
       {/* En-tête du formulaire */}
       <div className='border-b pb-4 mb-6 text-center'>
         <h2 className='text-2xl font-semibold text-gray-800'>{values.nom}</h2>
@@ -380,33 +390,26 @@ export const Formulaire: React.FC<FormulaireProps> = ({ values, onValuesChange }
                 </div>
                 <div className='grid grid-cols-[10rem_1fr] gap-x-8 items-start mt-4 print:hidden'>
                   <div className='text-gray-500 w-max shrink-0 pt-1'>Remarques : </div>
-                  <div className='flex gap-x-8'>
-                    <Textarea
+                  <div className='flex gap-x-8 w-full min-w-0'>
+                    <TextareaEditor
+                      className='w-full'
+                      prose={defaultTextareaProse}
                       value={data.dinner.remarks}
-                      onChange={(e) => {
+                      onValueChange={(value) => {
                         onValuesChange({
                           ...values,
-                          data: { ...data, dinner: { ...data.dinner, remarks: e.target.value } },
+                          data: { ...data, dinner: { ...data.dinner, remarks: value } },
                         })
                       }}
-                      rows={3}
                       placeholder='Ajouter des remarques'
                     />
                   </div>
                 </div>
-                {data.dinner.remarks && (
+                {hasRichTextContent(data.dinner.remarks) && (
                   <div className='print:flex hidden mt-2'>
                     <div className='bg-muted-foreground/10 py-3 px-8 rounded-md'>
                       <h3 className='text-base font-semibold text-gray-800'>Remarques :</h3>
-                      <p className='text-sm text-muted-foreground'>
-                        <InterpolateMD
-                          strong={(part) => <span className='font-semibold text-foreground'>{part}</span>}
-                          italic={(part) => <span className='italic'>{part}</span>}
-                          linebreak={() => <br className='block' />}
-                        >
-                          {data.dinner.remarks}
-                        </InterpolateMD>
-                      </p>
+                      <RichPrintContent value={data.dinner.remarks} />
                     </div>
                   </div>
                 )}
@@ -608,32 +611,34 @@ export const Formulaire: React.FC<FormulaireProps> = ({ values, onValuesChange }
                     </div>
                     <div className='grid grid-cols-[10rem_1fr] gap-x-8 items-start'>
                       <div className='text-gray-500 w-max shrink-0 pt-1'>Personne de contact : </div>
-                      <div className='flex gap-x-8'>
-                        <Textarea
+                      <div className='flex gap-x-8 w-full min-w-0'>
+                        <TextareaEditor
+                          className='w-full'
+                          prose={defaultTextareaProse}
                           value={data.informations.managerContact}
-                          onChange={(e) => {
+                          onValueChange={(value) => {
                             onValuesChange({
                               ...values,
-                              data: { ...data, informations: { ...data.informations, managerContact: e.target.value } },
+                              data: { ...data, informations: { ...data.informations, managerContact: value } },
                             })
                           }}
                           placeholder={"Tel : (+352) 621 123 456\nMail : contact@website.lu"}
-                          rows={3}
                         />
                       </div>
                     </div>
                     <div className='grid grid-cols-[10rem_1fr] gap-x-8 items-start'>
                       <div className='text-gray-500 w-max shrink-0 pt-1'>Remarques : </div>
-                      <div className='flex gap-x-8'>
-                        <Textarea
+                      <div className='flex gap-x-8 w-full min-w-0'>
+                        <TextareaEditor
+                          className='w-full'
+                          prose={defaultTextareaProse}
                           value={data.informations.message}
-                          onChange={(e) => {
+                          onValueChange={(value) => {
                             onValuesChange({
                               ...values,
-                              data: { ...data, informations: { ...data.informations, message: e.target.value } },
+                              data: { ...data, informations: { ...data.informations, message: value } },
                             })
                           }}
-                          rows={4}
                           placeholder='Ajouter des remarques'
                         />
                       </div>
@@ -676,31 +681,16 @@ export const Formulaire: React.FC<FormulaireProps> = ({ values, onValuesChange }
                         Responsable sur place : <span className='font-semibold'>{data.informations.managerName}</span>
                       </div>
                     )}
-                    {data.informations.managerContact && (
+                    {hasRichTextContent(data.informations.managerContact) && (
                       <div className='flex flex-col gap-y-1'>
                         Personne de contact :{" "}
-                        <span className='font-semibold'>
-                          <InterpolateMD
-                            strong={(part) => <span className='font-bold'>{part}</span>}
-                            italic={(part) => <span className='italic'>{part}</span>}
-                          >
-                            {data.informations.managerContact}
-                          </InterpolateMD>
-                        </span>
+                        <RichPrintContent value={data.informations.managerContact} className='font-semibold' />
                       </div>
                     )}
-                    {data.informations.message && (
+                    {hasRichTextContent(data.informations.message) && (
                       <div className='bg-muted-foreground/10 py-3 px-8 rounded-md mt-2'>
                         <h3 className='text-base font-semibold text-gray-800'>Remarques :</h3>
-                        <p className='text-sm text-muted-foreground'>
-                          <InterpolateMD
-                            strong={(part) => <span className='font-semibold text-foreground'>{part}</span>}
-                            italic={(part) => <span className='italic'>{part}</span>}
-                            linebreak={() => <br className='block' />}
-                          >
-                            {data.informations.message}
-                          </InterpolateMD>
-                        </p>
+                        <RichPrintContent value={data.informations.message} />
                       </div>
                     )}
                   </div>
@@ -757,6 +747,19 @@ const RowContent: React.FC<React.ComponentProps<"div">> = ({ className, children
     <div className={cn("flex gap-x-8 pt-0.5 gap-y-2", className)} {...props}>
       {children}
     </div>
+  )
+}
+
+const hasRichTextContent = (value: string) => {
+  return value.replace(/<[^>]+>/g, "").replace(/&nbsp;/g, " ").trim().length > 0
+}
+
+const RichPrintContent: React.FC<{ value: string; className?: string }> = ({ value, className }) => {
+  return (
+    <div
+      className={cn("text-sm text-muted-foreground prose prose-sm max-w-none", defaultTextareaProse, className)}
+      dangerouslySetInnerHTML={{ __html: value }}
+    />
   )
 }
 
